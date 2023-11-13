@@ -1,0 +1,10 @@
+[package]
+name = "alternating-chars"
+version = "0.1.0"
+edition = "2021"
+description = "A simple Rust program to print alternating characters from a provided string."
+repository = "https://github.com/dongrote/rust-kata"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
