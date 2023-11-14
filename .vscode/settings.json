@@ -1,5 +1,6 @@
 {
     "rust-analyzer.linkedProjects": [
-        "./alternating-chars/Cargo.toml"
+        "./alternating-chars/Cargo.toml",
+        "./insertion-sort/Cargo.toml"
     ]
 }

@@ -5,7 +5,6 @@ pub fn insertion_sort(values: &Vec<i16>) -> Vec<i16> {
   }
 
   for value in values {
-    println!("value: {}", value);
     let mut i: usize = 0;
     while i < sorted.len() {
       if value < &sorted[i] {
