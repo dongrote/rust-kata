@@ -2,6 +2,7 @@
     "rust-analyzer.linkedProjects": [
         "./alternating-chars/Cargo.toml",
         "./insertion-sort/Cargo.toml",
-        "./append-to-file/Cargo.toml"
+        "./append-to-file/Cargo.toml",
+        "./timetrack/Cargo.toml"
     ]
 }
