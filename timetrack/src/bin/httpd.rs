@@ -1,4 +1,4 @@
-use std::{path::Path, sync::{Mutex, Arc}};
+use std::{path::Path, sync::{Mutex, Arc}, env};
 
 use actix_web::{get, put, web, App, HttpResponse, HttpServer, Responder, http::header::ContentType};
 use timetrack::types::timetrackerstores::TimeTrackerFileStore;
@@ -71,7 +71,12 @@ async fn stop(data: web::Data<AppState>) -> impl Responder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    match TimeTrackerFileStore::from_file(Path::new("foo.txt")) {
+    let args: Vec<String> = env::args().collect();
+    let timer_path = match args.len() > 1 {
+        true => Path::new(&args[1]),
+        false => Path::new("foo.txt"),
+    };
+    match TimeTrackerFileStore::from_file(timer_path) {
         Ok(time_tracker_store) => {
             let rc_time_tracker_store = Arc::new(Mutex::new(time_tracker_store));
             HttpServer::new(move || {

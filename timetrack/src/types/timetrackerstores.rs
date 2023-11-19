@@ -1,3 +1,4 @@
+use std::ffi::OsStr;
 use std::path::PathBuf;
 use std::{path::Path, ffi::OsString};
 use std::io::{self, Read, Write};
@@ -39,7 +40,10 @@ impl TimeTrackerFileStore {
                     Err(err) => Err(err),
                 }
             },
-            Err(err) => Err(err),
+            Err(_) => Ok(TimeTrackerFileStore {
+                duration: ActiveDuration::new(),
+                file_path: OsString::from(file),
+            }),
         }
     }
 
