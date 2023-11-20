@@ -1,7 +1,7 @@
 use std::{path::Path, sync::{Mutex, Arc}, env};
 
 use actix_web::{get, put, web, App, HttpResponse, HttpServer, Responder, http::header::ContentType};
-use timetrack::types::timetrackerstores::TimeTrackerFileStore;
+use timetrack::{types::timetrackerstores::TimeTrackerFileStore, ActiveDurationState};
 
 struct AppState {
     pub time_tracker_store: Arc<Mutex<TimeTrackerFileStore>>,
@@ -15,6 +15,12 @@ async fn ui() -> impl Responder {
     <style>
     body {background-color: black;}
     h1 {color: white; font-size: 10em; font-family: system-ui; font-style: italic;}
+    .paused { animation: blinky 2s linear infinite; }
+    @keyframes blinky {
+        50% {
+            opacity: 0;
+        }
+    }
     </style>
     </head>
     <body>
@@ -22,10 +28,10 @@ async fn ui() -> impl Responder {
         <script>
             const updateTime = () => {
                 const h = document.getElementsByTagName('h1')[0];
-                fetch('/elapsed')
-                    .then(res => res.body.getReader().read())
+                fetch('/state')
+                    .then(res => res.json())
                     .then(data => {
-                        let seconds = parseInt(new TextDecoder().decode(data.value));
+                        let seconds = data.duration.secs;
                         const hours = Math.floor(seconds / 3600);
                         seconds -= hours * 3600;
                         const minutes = Math.floor(seconds / 60);
@@ -33,6 +39,11 @@ async fn ui() -> impl Responder {
                         seconds -= minutes * 60;
                         const secondsString = `${seconds}`.padStart(2, '0');
                         h.textContent = `${hours}:${minutesString}:${secondsString}`;
+                        if (data.paused) {
+                            h.classList.add('paused');
+                        } else {
+                            h.classList.remove('paused');
+                        }
                         setTimeout(() => updateTime(), 1000);
                     })
                     .catch(console.error);
@@ -43,6 +54,12 @@ async fn ui() -> impl Responder {
 </html>
 ");
     HttpResponse::Ok().insert_header(ContentType::html()).body(body)
+}
+
+#[get("/state")]
+async fn state(data: web::Data<AppState>) -> web::Json<ActiveDurationState> {
+    let store = data.time_tracker_store.lock().unwrap();
+    web::Json(store.duration().state())
 }
 
 #[get("/elapsed")]
@@ -88,6 +105,7 @@ async fn main() -> std::io::Result<()> {
                     .service(resume)
                     .service(stop)
                     .service(ui)
+                    .service(state)
             })
             .bind(("0.0.0.0", 8080))?
             .run()

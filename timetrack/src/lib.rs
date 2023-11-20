@@ -7,12 +7,18 @@ pub fn name() -> &'static str {
 
 use std::time::{Instant, Duration};
 use std::ops::Sub;
+use serde::Serialize;
+
+#[derive(Clone, Debug, Serialize)]
+pub struct ActiveDurationState {
+    pub duration: Duration,
+    pub paused: bool,
+}
 
 #[derive(Clone, Debug)]
 pub struct ActiveDuration {
     start_from: Instant,
-    duration: Duration,
-    paused: bool,
+    state: ActiveDurationState,
 }
 
 impl ActiveDuration {
@@ -25,16 +31,20 @@ impl ActiveDuration {
         let seconds = numstring.parse::<u64>().unwrap_or(0);
         Ok(ActiveDuration {
             start_from: Instant::now().sub(Duration::from_secs(seconds)),
-            duration: Duration::from_secs(seconds),
-            paused,
+            state: ActiveDurationState {
+                duration: Duration::from_secs(seconds),
+                paused,
+            },
         })
     }
 
     pub fn new() -> ActiveDuration {
         ActiveDuration {
             start_from: Instant::now(),
-            duration: Duration::from_secs(0),
-            paused: false,
+            state: ActiveDurationState {
+                duration: Duration::from_secs(0),
+                paused: false,
+            },
         }
     }
 
@@ -45,27 +55,37 @@ impl ActiveDuration {
         }
     }
 
+    pub fn state(&self) -> ActiveDurationState {
+        match self.state.paused {
+            true => self.state.clone(),
+            false => ActiveDurationState {
+                duration: Instant::now().duration_since(self.start_from),
+                paused: false,
+            }
+        }
+    }
+
     pub fn elapsed(&self) -> Duration {
-        match self.paused {
-            true => self.duration.clone(),
+        match self.state.paused {
+            true => self.state.duration.clone(),
             false => Instant::now().duration_since(self.start_from),
         }
     }
 
     pub fn pause(&mut self) {
         if !self.paused() {
-            self.paused = true;
-            self.duration = Instant::now().duration_since(self.start_from);
+            self.state.paused = true;
+            self.state.duration = Instant::now().duration_since(self.start_from);
         }
     }
 
     pub fn resume(&mut self) {
-        self.start_from = Instant::now().sub(self.duration);
-        self.paused = false;
+        self.start_from = Instant::now().sub(self.state.duration);
+        self.state.paused = false;
     }
 
     pub fn paused(&self) -> bool {
-        self.paused
+        self.state.paused
     }
 }
 
