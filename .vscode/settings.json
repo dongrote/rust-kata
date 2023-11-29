@@ -4,6 +4,7 @@
         "./insertion-sort/Cargo.toml",
         "./append-to-file/Cargo.toml",
         "./timetrack/Cargo.toml",
-        "./azure-storage/Cargo.toml"
+        "./azure-storage/Cargo.toml",
+        "./merge-sort/Cargo.toml"
     ]
 }
