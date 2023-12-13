@@ -1,6 +1,8 @@
 use std::collections::VecDeque;
+use std::cmp::PartialOrd;
+use std::clone::Clone;
 
-fn _merge_sort(a: &Vec<u64>) -> Vec<u64> {
+fn _merge_sort<T: PartialOrd + Clone + Copy>(a: &Vec<T>) -> Vec<T> {
     /*
         MERGE-SORT(A, p, r)
         if p < r
@@ -21,7 +23,7 @@ fn _merge_sort(a: &Vec<u64>) -> Vec<u64> {
     }
 }
 
-fn _merge(l: &mut VecDeque<u64>, r: &mut VecDeque<u64>) -> Vec<u64> {
+fn _merge<T: PartialOrd + Clone + Copy>(l: &mut VecDeque<T>, r: &mut VecDeque<T>) -> Vec<T> {
     /*
         MERGE(A, p, q, r)
         n1 = q - p + 1
@@ -44,7 +46,7 @@ fn _merge(l: &mut VecDeque<u64>, r: &mut VecDeque<u64>) -> Vec<u64> {
                 }
             }
      */
-    let mut return_vec: Vec<u64> = Vec::new();
+    let mut return_vec: Vec<T> = Vec::new();
     let mut next_left = l.pop_front();
     let mut next_right = r.pop_front();
     loop {
@@ -86,6 +88,13 @@ mod tests {
         let a: Vec<u64> = vec![];
         let sorted = _merge_sort(&a);
         assert_eq!(sorted, []);
+    }
+
+    #[test]
+    fn test_merge_sort_works_with_signed_values() {
+        let a: Vec<i32> = vec![3, -5, 7, -2, 3, -54, 8, -9, 1, 0, 2];
+        let sorted = _merge_sort(&a);
+        assert_eq!(sorted, vec![-54, -9, -5, -2, 0, 1, 2, 3, 3, 7, 8]);
     }
 
     #[test]
